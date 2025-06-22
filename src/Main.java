@@ -11,8 +11,11 @@ public class Main {
             Cedula cedula = new Cedula(valores[i], random.nextInt(0, 7));
             estoque.put(valores[i], cedula);
         }
+        LogEmArquivo logEmArquivo = new LogEmArquivo("./event.log");
+        List<ICaixaNotificacao> notificadores = new ArrayList<>();
+        notificadores.add(logEmArquivo);
         
-        caixaEletronico = new CaixaEletronico(estoque);
+        caixaEletronico = new CaixaEletronico(estoque, notificadores);
 
         while (true) {
 
