@@ -14,19 +14,30 @@ public class CaixaEletronico {
         saldoTotal = soma;
     }
 
-    public void adicionarCedula(Cedula cedula) {
-        int valor = cedula.getVALOR();
+    public void cadastrarCedula(int valor) {
         if (estoque.containsKey(valor)) {
             throw new IllegalArgumentException("Cédula de R$" + valor + " já existe no sistema");
         }
+        Cedula cedula = new Cedula(valor, 0);
         estoque.put(valor, cedula);
         saldoTotal += valor * cedula.getQuantidade();
     }
 
+    public void removerCedula(int valor) {
+        if (!estoque.containsKey(valor)) {
+            throw new IllegalArgumentException("Cédula de R$" + valor + " não existe no sistema");
+        }
+        saldoTotal -= valor * estoque.get(valor).getQuantidade();
+        estoque.remove(valor);
+    }
+
     public void depositar(Map<Integer, Integer> deposito) {
+        int totalAntigo = saldoTotal;
         for (Map.Entry<Integer, Integer> entry : deposito.entrySet()) {
             adicionarQuantidade(entry.getKey(), entry.getValue());
         }
+        System.out.println("Depósito Realizado!");
+        System.out.println("Depósito no valor de R$" + (saldoTotal - totalAntigo));
     }
 
     public void adicionarQuantidade(int valor, int quantidade) {
@@ -60,7 +71,7 @@ public class CaixaEletronico {
         if (restante > 0) {
             throw new IllegalArgumentException("Não é possível sacar o valor solicitado - falta de cédulas específicas no caixa para sacar o valor exato \n" +
                     "Valor Faltante: R$" + restante + "\n" +
-            "Você pode sacar R$" + (valor - restante));
+            "Você pode sacar: R$" + (valor - restante));
         }
 
         System.out.println("Saque realizado!");
