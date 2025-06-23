@@ -3,6 +3,7 @@ import java.util.List;
 import java.util.Map;
 
 public class CaixaEletronico {
+    //Map e não um Set por que acesso direto é mais conveniênte para o desenvolvedor do que busca. Tirando esse fato, Set seria mais indicado.
     private Map<Integer, Cedula> estoque;
     private int saldoTotal;
     private List<ICaixaNotificacao> notificadores;
