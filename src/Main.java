@@ -7,6 +7,7 @@ public class Main {
     public static void main(String[] args) {
         Random random = new Random();
         Map<Integer, Cedula> estoque = new TreeMap<>(Comparator.reverseOrder());
+        //gera valores aleatórios para compor o dinheiro inicial do caixa
         for (int i = 0; i < 7; i++) {
             Cedula cedula = new Cedula(valores[i], random.nextInt(0, 7));
             estoque.put(valores[i], cedula);
@@ -19,6 +20,7 @@ public class Main {
 
         while (true) {
 
+            // Menu principal
             System.out.println("Sistema de Caixa Eletrônico");
             separadorDeTela();
 
@@ -34,44 +36,15 @@ public class Main {
             System.out.println("9 - Sair");
 
             switch (scanner.nextInt()) {
-                case 1: {
-                    depositar();
-                    break;
-                }
-                case 2: {
-                    sacar();
-                    break;
-                }
-                case 3: {
-                    cadastrarCedula();
-                    break;
-                }
-                case 4: {
-                    deletarCedula();
-                    break;
-                }
-                case 5: {
-                    adicionarQuantidade();
-                    break;
-                }
-                case 6: {
-                    removerQuantidade();
-                    break;
-                }
-                case 7: {
-                    caixaEletronico.consultarQuantidade();
-                    pausar();
-                    break;
-                }
-                case 8: {
-                    caixaEletronico.consultarValorTotal();
-                    pausar();
-                    break;
-                }
-                default: {
-                    System.exit(0);
-                    break;
-                }
+                case 1 -> depositar();
+                case 2 -> sacar();
+                case 3 -> cadastrarCedula();
+                case 4 -> deletarCedula();
+                case 5 -> adicionarQuantidade();
+                case 6 -> removerQuantidade();
+                case 7 -> checarQuantidade();
+                case 8 -> checarValorTotal();
+                default -> System.exit(0);
             }
         }
     }
@@ -82,11 +55,14 @@ public class Main {
 
     public static void depositar() {
         separadorDeTela();
-        Map<Integer, Integer> deposito = new HashMap<>();
+        Map<Integer, Cedula> deposito = new HashMap<>();
+
+        //loop perguntando cédula por cédula - adiciona só as que forem > 0
         System.out.println("Digite quantas cédulas de cada tipo serão depositadas:");
         for (int valor : caixaEletronico.getEstoque().keySet()) {
             System.out.print("Quantidade de cédulas de R$" + valor + ": ");
-            deposito.put(valor, scanner.nextInt());
+            Cedula cedula = new Cedula(valor, scanner.nextInt());
+            deposito.put(valor, cedula);
         }
         try {
             caixaEletronico.depositar(deposito);
@@ -110,6 +86,7 @@ public class Main {
 
     public static void cadastrarCedula() {
         separadorDeTela();
+        //adiciona uma categoria de cédula nova no sistema (ex: cadastrar cédula de 7 reais)
         System.out.print("Digite o valor da cédula a ser cadastrada: ");
         int valor = scanner.nextInt();
         try {
@@ -125,7 +102,6 @@ public class Main {
         separadorDeTela();
         System.out.print("Digite o valor da cédula a ser cadastrada: ");
         int valor = scanner.nextInt();
-        Cedula cedula = new Cedula(valor, 0);
         try {
             caixaEletronico.removerCedula(valor);
             System.out.println("Cédula removida do sistema");
@@ -138,6 +114,8 @@ public class Main {
     public static void adicionarQuantidade() {
         separadorDeTela();
         System.out.println("Digite quantas cédulas de cada tipo serão adicionadas:");
+
+        //loop perguntando cédula por cédula - adiciona só as que forem > 0
         for (int valor : caixaEletronico.getEstoque().keySet()) {
             System.out.print("Quantidade de cédulas de R$" + valor + ": ");
 
@@ -153,6 +131,8 @@ public class Main {
     public static void removerQuantidade() {
         separadorDeTela();
         System.out.println("Digite quantas cédulas de cada tipo serão removidas:");
+
+        //loop perguntando cédula por cédula - adiciona só as que forem > 0
         for (int valor : caixaEletronico.getEstoque().keySet()) {
             System.out.print("Quantidade de cédulas de R$" + valor + ": ");
 
@@ -162,6 +142,23 @@ public class Main {
                 System.out.println("Erro: " + e.getMessage());
             }
         }
+        pausar();
+    }
+
+    public static void checarQuantidade() {
+        separadorDeTela();
+        Map<Integer, Cedula> estoqueAtual = caixaEletronico.consultarQuantidade();
+        System.out.println("Quantidade de cada cédula no estoque: ");
+        for (Map.Entry<Integer, Cedula> entry : estoqueAtual.entrySet()) {
+            System.out.println("Valor da cédula: R$" + entry.getKey() + "; Quantidade: " + entry.getValue().getQuantidade());
+        }
+        pausar();
+    }
+
+    public static void checarValorTotal() {
+        separadorDeTela();
+        int saldoTotal = caixaEletronico.consultarValorTotal();
+        System.out.println("Valor total guardado no caixa eletrônico: " + saldoTotal);
         pausar();
     }
 

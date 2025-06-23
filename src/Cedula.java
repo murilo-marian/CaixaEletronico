@@ -1,6 +1,6 @@
-import java.util.Arrays;
+import java.util.Objects;
 
-public class Cedula {
+public class Cedula implements Comparable<Cedula>{
     final int VALOR;
     int quantidade;
 
@@ -36,5 +36,24 @@ public class Cedula {
             throw new IllegalArgumentException("Impossível remover - quantidade atual menor que a quantidade a ser removida");
         }
         this.quantidade -= quantidade;
+    }
+
+    @Override
+    public int compareTo(Cedula outra) {
+        // Ordenar do maior para o menor valor
+        return Integer.compare(outra.VALOR, this.VALOR);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Cedula)) return false;
+        Cedula cedula = (Cedula) o;
+        return VALOR == cedula.VALOR;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(VALOR);
     }
 }

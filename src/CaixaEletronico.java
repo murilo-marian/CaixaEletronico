@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -6,8 +5,13 @@ import java.util.Map;
 public class CaixaEletronico {
     private Map<Integer, Cedula> estoque;
     private int saldoTotal;
-    private List<ICaixaNotificacao> notificadores = new ArrayList<>();
+    private List<ICaixaNotificacao> notificadores;
 
+    /**
+     *
+     * @param estoque Map com o estoque inicial de cédulas, completo com suas respectivas quantias
+     * @param notificadores Lista de notificadores a serem utilizados no sistema. Todos são utilizados sempre que uma notificação é disparada.
+     */
     public CaixaEletronico(Map<Integer, Cedula> estoque, List<ICaixaNotificacao> notificadores) {
         this.estoque = estoque;
         this.notificadores = notificadores;
@@ -18,6 +22,10 @@ public class CaixaEletronico {
         saldoTotal = soma;
     }
 
+    /**
+     * Adiciona uma cédula completamente nova ao sistema
+     * @param valor Valor da nova cédula a ser cadastrada (ex: 7 reais)
+     */
     public void cadastrarCedula(int valor) {
         if (estoque.containsKey(valor)) {
             notificar("Cédula de R$" + valor + " já existe no sistema");
@@ -31,6 +39,10 @@ public class CaixaEletronico {
         saldoTotal += valor * cedula.getQuantidade();
     }
 
+    /**
+     * Remove uma cédula do sistema completamente
+     * @param valor Valor da cédula presente no sistema a ser removida (ex: deletar cédula de 2 reais)
+     */
     public void removerCedula(int valor) {
         if (!estoque.containsKey(valor)) {
             notificar("Tentativa falha de remover cédula do sistema - cédula inexistente - valor: R$" + valor);
@@ -41,15 +53,19 @@ public class CaixaEletronico {
         estoque.remove(valor);
     }
 
-    public void depositar(Map<Integer, Integer> deposito) {
+    /**
+     * Deposita uma quantidade de cada cédula no caixa
+     * @param deposito Map que contém o valor da cédula e a sua quantidade a ser depositada.
+     */
+    public void depositar(Map<Integer, Cedula> deposito) {
         int totalAntigo = saldoTotal;
-        String adicao = "";
-        for (Map.Entry<Integer, Integer> entry : deposito.entrySet()) {
-            if (entry.getValue() != 0) {
-                adicao += " " + entry.getValue() + "x de R$ " + entry.getKey() + ";";
+        StringBuilder adicao = new StringBuilder();
+        for (Map.Entry<Integer, Cedula> entry : deposito.entrySet()) {
+            if (entry.getValue().getVALOR() != 0) {
+                adicao.append(" ").append(entry.getValue()).append("x de R$ ").append(entry.getKey()).append(";");
                 try {
-                    adicionarQuantidade(entry.getKey(), entry.getValue());
-                    adicionarQuantidade(entry.getKey(), entry.getValue());
+                    adicionarQuantidade(entry.getKey(), entry.getValue().getQuantidade());
+                    adicionarQuantidade(entry.getKey(), entry.getValue().getQuantidade());
                 } catch (IllegalArgumentException e) {
                     System.out.println("Erro na tentativa de depósito: " + e);
                     notificar("Erro na tentativa de depósito: " + e);
@@ -62,6 +78,11 @@ public class CaixaEletronico {
         System.out.println("Depósito no valor de R$" + (valorDepositado));
     }
 
+    /**
+     * Adiciona uma quantidade específica de uma cédula ao sistema
+     * @param valor Valor de cédula que está sendo adicionada a quantidade
+     * @param quantidade A quantidade de cédulas adicionadas
+     */
     public void adicionarQuantidade(int valor, int quantidade) {
         Cedula cedula = estoque.get(valor);
         if (cedula == null) {
@@ -71,6 +92,10 @@ public class CaixaEletronico {
         saldoTotal+= valor * quantidade;
     }
 
+    /**
+     * Sacar um valor do caixa
+     * @param valor Valor a ser sacado
+     */
     public void sacar(int valor) {
         int restante = valor;
         Map<Integer, Integer> cedulasParaEntregar = new HashMap<>();
@@ -82,6 +107,9 @@ public class CaixaEletronico {
             notificar("Erro em tentativa de saque: Valor inserido por usuário é negativo");
             throw new IllegalArgumentException("Valores negativos não são permitidos");
         }
+
+        //Pega as cédulas de maior ao menor valor, procura sempre entregar a mínima quantidade de cédulas possíveis com
+        //esse sistema
         for (Integer valorCedula: estoque.keySet()) {
             int quantidadeNoEstoque = estoque.get(valorCedula).getQuantidade();
             int quantidadeNecessaria = restante / valorCedula;
@@ -101,10 +129,10 @@ public class CaixaEletronico {
 
         System.out.println("Saque realizado!");
         System.out.println("Cédulas entregues:");
-        String remocao = "";
+        StringBuilder remocao = new StringBuilder();
         for (Map.Entry<Integer, Integer> entry : cedulasParaEntregar.entrySet()) {
             if (entry.getValue() != 0) {
-                remocao += " " + entry.getValue() + "x de R$ " +entry.getKey() + ";";
+                remocao.append(" ").append(entry.getValue()).append("x de R$ ").append(entry.getKey()).append(";");
                 removerQuantidade(entry.getKey(), entry.getValue());
             }
         }
@@ -112,6 +140,11 @@ public class CaixaEletronico {
         notificar("Saque realizado no valor de R$" + valor + ".\nConteúdo:" + remocao);
     }
 
+    /**
+     * Remove uma certa quantidade de cédulas de um determinado valor do sistema
+     * @param valor Valor do qual a quantidade será subtraída
+     * @param quantidade Quantidade a ser subtraída
+     */
     public void removerQuantidade(int valor, int quantidade) {
         Cedula cedula = estoque.get(valor);
         if (cedula == null) {
@@ -121,21 +154,27 @@ public class CaixaEletronico {
         saldoTotal-= valor * quantidade;
     }
 
-    //consulta a soma de todas as cédulas
-    public void consultarValorTotal() {
+
+    /**
+     * Mostra o saldo total do caixa
+     */
+    public int consultarValorTotal() {
         notificar("Consulta de valor total realizada");
-        System.out.println("Valor total guardado no caixa eletrônico: " + saldoTotal);
+        return saldoTotal;
     }
 
-    //mostra a quantidade de cada cédula de forma legível
-    public void consultarQuantidade() {
+    /**
+     * Mostra a quantidade de cada cédula de forma legível
+     */
+    public Map<Integer, Cedula> consultarQuantidade() {
         notificar("Consulta de quantidade realizada");
-        System.out.println("Quantidade de cada cédula no estoque: ");
-        for (Map.Entry<Integer, Cedula> entry : estoque.entrySet()) {
-            System.out.println("Valor da cédula: R$" + entry.getKey() + "; Quantidade: " + entry.getValue().getQuantidade());
-        }
+        return getEstoque();
     }
 
+    /**
+     * Repete sobre a lista de notificadores, lançando notificações para todas as implementações adicionadas
+     * @param mensagem Mensagem a ser enviada para as implementações
+     */
     private void notificar(String mensagem) {
         for (ICaixaNotificacao notificador : notificadores) {
             notificador.notificar(mensagem);
