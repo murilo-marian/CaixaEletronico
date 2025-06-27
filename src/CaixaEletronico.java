@@ -66,7 +66,6 @@ public class CaixaEletronico {
                 adicao.append(" ").append(entry.getValue()).append("x de R$ ").append(entry.getKey()).append(";");
                 try {
                     adicionarQuantidade(entry.getKey(), entry.getValue().getQuantidade());
-                    adicionarQuantidade(entry.getKey(), entry.getValue().getQuantidade());
                 } catch (IllegalArgumentException e) {
                     System.out.println("Erro na tentativa de depósito: " + e);
                     notificar("Erro na tentativa de depósito: " + e);
