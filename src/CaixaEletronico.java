@@ -97,7 +97,8 @@ public class CaixaEletronico {
      * @param valor Valor a ser sacado
      */
     public void sacar(int valor) {
-        int restante = valor;
+
+        int restante = taxarValor(valor);
         Map<Integer, Integer> cedulasParaEntregar = new HashMap<>();
         if (valor > saldoTotal) {
             notificar("Erro em tentativa de saque: Valor de R$" + valor + " indisponível no caixa");
@@ -138,6 +139,17 @@ public class CaixaEletronico {
         }
         System.out.println(remocao);
         notificar("Saque realizado no valor de R$" + valor + ".\nConteúdo:" + remocao);
+    }
+
+    private int taxarValor(int valor) {
+
+        int taxa = (int) (valor * 0.03);
+
+        if (taxa < 10) {
+            return valor - taxa;
+        } else {
+            return valor - 10;
+        }
     }
 
     /**
